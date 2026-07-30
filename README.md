@@ -15,7 +15,7 @@
 ## Quick Start
 
 ```
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/tatpow/fuster/master/install.sh)
 ```
 
 ## Structure
