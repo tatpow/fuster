@@ -9,6 +9,7 @@
 > [!NOTE]
 > Remember – your individuality is the most important thing. <b>Cogita, patere et crea!</b>
 
+> [!IMPORTANT]
 > This project is intended for personal use only. Please do not use it in a production environment.
 
 ## Quick Start
