@@ -15,16 +15,11 @@
 ## Quick Start
 
 ```
-bash <(curl -fsSL https://raw.githubusercontent.com/USERNAME/fuster/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/tatpow/fuster/main/install.sh)
 ```
 
 That's it — one command deploys the placeholder site (domain, page style, cert, nginx, firewall).
 
-Need a dashboard too? That's a separate one-liner, not something this repo wraps:
-
-```
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
-```
 
 ## Structure
 
