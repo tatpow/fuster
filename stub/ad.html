@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>403</title>
+<style>
+  :root {
+    --bg-paper: #f5f7f2;
+    --card-paper: #ffffff;
+    --border-paper: #e5e0d4;
+    --border-dark: #cfe4ae;
+    --ink-main: #2b2927;
+    --ink-muted: #736d64;
+    --ink-faint: #aaa396;
+    --accent-stamp: #506b29;
+  }
+
+  * { 
+    box-sizing: border-box; 
+  }
+
+  body {
+    background-color: var(--bg-paper);
+    color: var(--ink-main);
+    font-family: 'JetBrains Mono', 'Space Mono', 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    padding: 24px;
+    overflow: hidden;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .container {
+    width: 100%;
+    max-width: 580px;
+    background: var(--card-paper);
+    border: 1px solid var(--border-paper);
+    border-radius: 4px;
+    padding: 36px 32px;
+    box-shadow: 
+      0 12px 32px rgba(60, 50, 40, 0.03),
+      0 2px 6px rgba(0, 0, 0, 0.02);
+    display: flex;
+    flex-direction: column;
+    position: relative;
+  }
+
+  .header-tag {
+    align-self: flex-start;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--accent-stamp);
+    border: 1px solid var(--accent-stamp);
+    padding: 4px 8px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+  }
+
+  .header-tag svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  h1 {
+    font-family: Georgia, 'Times New Roman', serif;
+    font-size: 28px;
+    font-weight: 400;
+    color: var(--ink-main);
+    margin: 0 0 8px 0;
+    letter-spacing: -0.5px;
+  }
+
+  .subtitle {
+    font-size: 12px;
+    color: var(--ink-muted);
+    margin-bottom: 28px;
+    line-height: 1.5;
+  }
+
+  .tech-card {
+    background: var(--bg-paper);
+    border: 1px dashed var(--border-dark);
+    border-radius: 3px;
+    padding: 16px;
+    margin-bottom: 24px;
+    font-size: 12px;
+    line-height: 1.8;
+  }
+
+  .tech-card-header {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--ink-muted);
+    text-transform: uppercase;
+    margin-bottom: 10px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid var(--border-paper);
+  }
+
+  .tech-card-header svg {
+    width: 14px;
+    height: 14px;
+  }
+
+  .tech-row {
+    display: flex;
+    justify-content: space-between;
+    border-bottom: 1px solid var(--border-paper);
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+  }
+
+  .tech-row:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .label { color: var(--ink-muted); }
+  .value { color: var(--ink-main); font-weight: 600; }
+
+  .message-box {
+    border-left: 2px solid var(--accent-stamp);
+    padding-left: 16px;
+    margin-bottom: 32px;
+  }
+
+  .message-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--accent-stamp);
+    font-weight: 700;
+    margin-bottom: 6px;
+  }
+
+  .message-title svg {
+    width: 14px;
+    height: 14px;
+    fill: currentColor;
+  }
+
+  .message-text {
+    font-size: 12px;
+    color: var(--ink-muted);
+    line-height: 1.65;
+    margin: 0;
+  }
+
+  .footer-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-top: 20px;
+    border-top: 1px solid var(--border-paper);
+    font-size: 10px;
+    color: var(--ink-faint);
+    letter-spacing: 0.5px;
+  }
+
+  .brand {
+    font-weight: 600;
+    color: var(--ink-muted);
+  }
+</style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <div class="header-tag">
+      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 16h.01"/><path d="M12 8v4"/><path d="M15.312 2a2 2 0 0 1 1.414.586l4.688 4.688A2 2 0 0 1 22 8.688v6.624a2 2 0 0 1-.586 1.414l-4.688 4.688a2 2 0 0 1-1.414.586H8.688a2 2 0 0 1-1.414-.586l-4.688-4.688A2 2 0 0 1 2 15.312V8.688a2 2 0 0 1 .586-1.414l4.688-4.688A2 2 0 0 1 8.688 2z"/></svg>
+      <span>403</span>
+    </div>
+
+    <h1>Доступ ограничен</h1>
+    <div class="subtitle">Система зафиксировала активное расширение для блокировки рекламы.</div>
+
+    <div class="tech-card">
+      <div class="tech-card-header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 18a2 2 0 0 0-4 0"/><path d="m19 11-2.11-6.657a2 2 0 0 0-2.752-1.148l-1.276.61A2 2 0 0 1 12 4H8.5a2 2 0 0 0-1.925 1.456L5 11"/><path d="M2 11h20"/><circle cx="17" cy="18" r="3"/><circle cx="7" cy="18" r="3"/></svg>
+        Данные подключения
+      </div>
+      <div class="tech-row">
+        <span class="label">IP-АДРЕС:</span>
+        <span class="value" id="userIp">Определение...</span>
+      </div>
+      <div class="tech-row">
+        <span class="label">ID ИНЦИДЕНТА:</span>
+        <span class="value" id="incidentId">...</span>
+      </div>
+      <div class="tech-row">
+        <span class="label">СТАТУС:</span>
+        <span class="value" style="color: var(--accent-stamp);">ОТКЛОНЕНО</span>
+      </div>
+    </div>
+
+    <div class="message-box">
+      <div class="message-title">
+        <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>AdBlock</title><path d="M7.775 0a1.8 1.8 0 0 0-1.273.527L.528 6.503A1.8 1.8 0 0 0 0 7.775v8.45c0 .478.19.936.528 1.274l5.974 5.974A1.8 1.8 0 0 0 7.775 24h8.45a1.8 1.8 0 0 0 1.273-.527l5.975-5.974A1.8 1.8 0 0 0 24 16.225v-8.45a1.8 1.8 0 0 0-.527-1.272L17.498.527A1.8 1.8 0 0 0 16.225 0zm4.427 3c1.02 0 .958 1.108.958 1.108v6.784s-.009.218.16.218c.188 0 .175-.226.175-.226l-.002-5.63s-.05-.986.959-.986c1.01 0 .97.983.97.983v7.621s.014.158.141.158c.127 0 .944-2.122.944-2.122s.451-1.497 2.576-1.1c.038.008-.167.688-.167.688l-2.283 6.556S15.69 20.7 11.714 20.7c-5.044 0-4.808-5.407-4.814-5.405V7.562s-.016-.99.897-.99c.858 0 .849.99.849.99l.007 3.583s-.004.172.167.172c.16 0 .141-.172.141-.172l.01-5.926s-.055-1.162.966-1.162c1.04 0 .983 1.142.983 1.142v5.611s-.005.204.152.204c.168 0 .154-.206.154-.206l.01-6.693S11.18 3 12.202 3Z"/></svg>
+        Инструкция по разблокировке
+      </div>
+      <p class="message-text">
+        Использование AdBlock запрещено на данном ресурсе. Пожалуйста, отключите блокировщик для этого сайта и обновите страницу.<br><br>
+        Если вы считаете, что это ошибка, или проблема остается — пожалуйста, <strong>обратитесь к администратору</strong>.
+      </p>
+    </div>
+
+    <div class="footer-line">
+      <span>REF_NO: 884-AB-2026</span>
+    </div>
+
+  </div>
+
+  <script>
+    const bytes = new Uint8Array(8);
+    crypto.getRandomValues(bytes);
+    const rayId = Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('').toUpperCase();
+
+    document.getElementById('incidentId').textContent = rayId;
+
+    fetch('https://api.ipify.org?format=json')
+      .then(res => res.json())
+      .then(data => {
+        document.getElementById('userIp').textContent = data.ip;
+      })
+      .catch(() => {
+        document.getElementById('userIp').textContent = 'Не определен';
+      });
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="ru" data-theme="ayu-dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Панель управления — Вход</title>
+<style>
+  [data-theme="ayu-dark"] {
+    --base00: #0f1419;
+    --base01: #131721;
+    --base02: #242936;
+    --base03: #5c6773;
+    --base04: #abb2bf;
+    --base05: #e6e1cf;
+    --base08: #ff3333;
+    --base0D: #36a3d9;
+    
+    --bg-body: var(--base00);
+    --bg-card: var(--base01);
+    --bg-input: var(--base00);
+    --border-color: var(--base02);
+    --border-focus: var(--base0D);
+    --text-main: var(--base05);
+    --text-muted: var(--base03);
+    --btn-bg: var(--base0D);
+    --btn-text: var(--base00);
+    
+    --error-bg: rgba(255, 51, 51, 0.1);
+    --error-border: rgba(255, 51, 51, 0.3);
+    --error-text: #ff6666;
+  }
+
+  [data-theme="ayu-light"] {
+    --base00: #fafafa;
+    --base01: #f3f4f5;
+    --base02: #e6e8eb;
+    --base03: #abb2bf;
+    --base04: #8a9199;
+    --base05: #5c6166;
+    --base08: #f07178;
+    --base0D: #399ee6;
+
+    --bg-body: var(--base00);
+    --bg-card: var(--base01);
+    --bg-input: var(--base00);
+    --border-color: var(--base02);
+    --border-focus: var(--base0D);
+    --text-main: var(--base05);
+    --text-muted: var(--base04);
+    --btn-bg: var(--base0D);
+    --btn-text: #ffffff;
+    
+    --error-bg: rgba(240, 113, 120, 0.12);
+    --error-border: rgba(240, 113, 120, 0.3);
+    --error-text: #e65050;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background-color: var(--bg-body);
+    color: var(--text-main);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    margin: 0;
+    transition: background-color 0.25s, color 0.25s;
+  }
+
+  .theme-switcher {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: var(--bg-card);
+    color: var(--text-main);
+    border: 1px solid var(--border-color);
+    padding: 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+  }
+  .theme-switcher:hover { border-color: var(--border-focus); }
+
+  .theme-switcher .icon-sun { display: none; }
+  .theme-switcher .icon-moon { display: block; }
+  [data-theme="ayu-light"] .theme-switcher .icon-sun { display: block; }
+  [data-theme="ayu-light"] .theme-switcher .icon-moon { display: none; }
+
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 36px 32px;
+    width: 100%;
+    max-width: 360px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .logo {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+    color: var(--text-main);
+  }
+
+  h1 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 0 0 24px;
+    text-align: center;
+  }
+
+  .alert-error {
+    display: none;
+    background-color: var(--error-bg);
+    border: 1px solid var(--error-border);
+    color: var(--error-text);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    margin-bottom: 20px;
+    text-align: center;
+    animation: fadeIn 0.2s ease-in-out;
+  }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .form-group { margin-bottom: 18px; }
+
+  label {
+    display: block;
+    font-size: 13px;
+    font-weight: 500;
+    margin-bottom: 6px;
+  }
+
+  input[type="text"],
+  input[type="password"] {
+    width: 100%;
+    padding: 11px 14px;
+    background: var(--bg-input);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  input[type="text"]:focus,
+  input[type="password"]:focus {
+    border-color: var(--border-focus);
+  }
+
+  input::placeholder { color: var(--text-muted); }
+
+  .options { margin: 20px 0 24px; display: flex; align-items: center; }
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: var(--text-muted);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .checkbox-label input[type="checkbox"] { accent-color: var(--btn-bg); }
+
+  button[type="submit"] {
+    width: 100%;
+    padding: 12px;
+    background: var(--btn-bg);
+    color: var(--btn-text);
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+
+  button[type="submit"]:hover { opacity: 0.9; }
+  button[type="submit"]:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  .note {
+    margin-top: 24px;
+    font-size: 12px;
+    color: var(--text-muted);
+    text-align: center;
+    line-height: 1.4;
+  }
+</style>
+</head>
+<body>
+
+  <button class="theme-switcher" onclick="toggleTheme()" aria-label="Сменить тему">
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-moon-icon lucide-moon icon-moon"><path d="M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401"/></svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sun-icon lucide-sun icon-sun"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
+  </button>
+
+  <div class="card">
+    <div class="logo">
+      <svg xmlns="http://www.w3.org/2000/svg" width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-key-round-icon lucide-key-round"><path d="M2.586 17.414A2 2 0 0 0 2 18.828V21a1 1 0 0 0 1 1h3a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h1a1 1 0 0 0 1-1v-1a1 1 0 0 1 1-1h.172a2 2 0 0 0 1.414-.586l.814-.814a6.5 6.5 0 1 0-4-4z"/><circle cx="16.5" cy="7.5" r=".5" fill="currentColor"/></svg>
+    </div>
+
+    <h1>Вход в панель управления</h1>
+    
+    <div id="errorAlert" class="alert-error"></div>
+
+    <form id="loginForm">
+      <div class="form-group">
+        <label>Логин</label>
+        <input type="text" id="username" placeholder="Введите логин" autocomplete="off" required>
+      </div>
+      
+      <div class="form-group">
+        <label>Пароль</label>
+        <input type="password" id="password" placeholder="Введите пароль" autocomplete="off" required>
+      </div>
+
+      <div class="options">
+        <label class="checkbox-label">
+          <input type="checkbox">
+          Запомнить меня
+        </label>
+      </div>
+      
+      <button type="submit" id="submitBtn">Войти</button>
+    </form>
+
+    <div class="note">Доступ ограничен.<br>Обратитесь к администратору.</div>
+  </div>
+
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('./sw.js').catch(() => {});
+      });
+    }
+
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.getAttribute('data-theme') === 'ayu-dark') {
+        html.setAttribute('data-theme', 'ayu-light');
+      } else {
+        html.setAttribute('data-theme', 'ayu-dark');
+      }
+    }
+
+    const loginForm = document.getElementById('loginForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const errorAlert = document.getElementById('errorAlert');
+
+    loginForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+
+      errorAlert.style.display = 'none';
+      submitBtn.disabled = true;
+      submitBtn.textContent = 'Проверка...';
+
+      try {
+        const response = await fetch('/api/v1/auth/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            login: document.getElementById('username').value,
+            password: document.getElementById('password').value
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          errorAlert.textContent = data.message || 'Ошибка авторизации';
+          errorAlert.style.display = 'block';
+        }
+      } catch (err) {
+        errorAlert.textContent = 'Ошибка соединения с сервером';
+        errorAlert.style.display = 'block';
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = 'Войти';
+      }
+    });
+  </script>
+
+</body>
+</html>

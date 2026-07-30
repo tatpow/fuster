@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+  <html lang="ru">
+  <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>503 :: SYS_OVERLOAD</title>
+  <style>
+    :root {
+      --base00: #1c1213;
+      --base01: #3a2425;
+      --base02: #563837;
+      --base03: #6d4745;
+      --base04: #8b5d57;
+      --base05: #a87569;
+      --base06: #c58d7b;
+      --base07: #e3a68c;
+      --base08: #c24f57;
+      --base09: #a63650;
+      --base0A: #f28171;
+      --base0B: #806c61;
+      --base0C: #6b6566;
+      --base0D: #684c59;
+      --base0E: #a63650;
+      --base0F: #893f45;
+    }
+
+    * { 
+      box-sizing: border-box; 
+      cursor: none !important;
+    }
+
+    body {
+      background-color: var(--base00);
+      background-image: 
+        linear-gradient(rgba(86, 56, 55, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(86, 56, 55, 0.08) 1px, transparent 1px);
+      background-size: 32px 32px;
+      background-position: center center;
+      color: var(--base05);
+      font-family: 'JetBrains Mono', 'Fira Code', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      margin: 0;
+      padding: 24px;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .cursor-dot {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 5px;
+      height: 5px;
+      background-color: var(--base07);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 9999;
+      transform: translate(-50%, -50%);
+      box-shadow: 0 0 8px var(--base07);
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .cursor-coords {
+      position: fixed;
+      top: 0;
+      left: 0;
+      font-size: 10px;
+      color: var(--base04);
+      background: rgba(28, 18, 19, 0.9);
+      border: 1px solid var(--base01);
+      padding: 2px 6px;
+      border-radius: 3px;
+      pointer-events: none;
+      z-index: 9998;
+      transform: translate(10px, -20px);
+      white-space: nowrap;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 620px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .tag-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--base08);
+      background: var(--base00);
+      border: 1px solid var(--base01);
+      padding: 4px 10px;
+      border-radius: 4px;
+      margin-bottom: 24px;
+      letter-spacing: 0.5px;
+    }
+
+    .pulse-dot {
+      width: 6px;
+      height: 6px;
+      background-color: var(--base08);
+      border-radius: 50%;
+      position: relative;
+    }
+
+    .pulse-dot::after {
+      content: '';
+      position: absolute;
+      top: -2px;
+      left: -2px;
+      right: -2px;
+      bottom: -2px;
+      border-radius: 50%;
+      border: 1px solid var(--base08);
+      animation: pulse 1.8s infinite ease-in-out;
+    }
+
+    @keyframes pulse {
+      0% { transform: scale(0.8); opacity: 1; }
+      100% { transform: scale(2.2); opacity: 0; }
+    }
+
+    h1 {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--base07);
+      letter-spacing: 4px;
+      margin: 0 0 32px 0;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .grid-info {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      width: 100%;
+      margin-bottom: 12px;
+    }
+
+    @media (max-width: 500px) {
+      .grid-info { grid-template-columns: 1fr; }
+    }
+
+    .panel {
+      background: rgba(28, 18, 19, 0.85);
+      border: 1px solid var(--base01);
+      border-radius: 6px;
+      padding: 16px;
+    }
+
+    .panel-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--base04);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 12px;
+    }
+
+    .panel-header svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--base0A);
+    }
+
+    .tech-data {
+      font-size: 12px;
+      color: var(--base06);
+      line-height: 1.8;
+    }
+
+    .tech-data .dim { color: var(--base03); }
+
+    .timer-box {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: calc(100% - 28px);
+    }
+
+    .timer-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--base07);
+      letter-spacing: 2px;
+    }
+
+    .notice-panel {
+      width: 100%;
+      background: rgba(28, 18, 19, 0.85);
+      border: 1px solid var(--base01);
+      border-radius: 6px;
+      padding: 16px;
+      margin-bottom: 32px;
+    }
+
+    .notice-text {
+      font-size: 12px;
+      color: var(--base04);
+      line-height: 1.6;
+      margin: 0;
+    }
+
+    .footer-info {
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .status-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--base03);
+    }
+
+    .status-line svg {
+      width: 14px;
+      height: 14px;
+      animation: spin 4s linear infinite;
+    }
+
+    @keyframes spin {
+      100% { transform: rotate(360deg); }
+    }
+
+    .brand {
+      font-size: 11px;
+      color: var(--base02);
+      letter-spacing: 2px;
+      margin-top: 16px;
+    }
+  </style>
+  </head>
+  <body>
+
+    <div class="cursor-dot" id="cursorDot"></div>
+    <div class="cursor-coords" id="cursorCoords">[000.000; 000.000]</div>
+
+    <div class="container">
+      
+      <div class="tag-status">
+        <span class="pulse-dot"></span>
+        <span>SYSTEM :: ERR_503</span>
+      </div>
+
+      <h1>Критическая нагрузка</h1>
+
+      <div class="grid-info">
+        <div class="panel">
+          <div class="panel-header">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-logs-icon lucide-logs"><path d="M3 5h1"/><path d="M3 12h1"/><path d="M3 19h1"/><path d="M8 5h1"/><path d="M8 12h1"/><path d="M8 19h1"/><path d="M13 5h8"/><path d="M13 12h8"/><path d="M13 19h8"/></svg>
+            Технические данные
+          </div>
+          <div class="tech-data">
+            <div><span class="dim">IP:</span> <span id="visitorIp">определяется...</span></div>
+            <div><span class="dim">ID:</span> <span id="incidentId"></span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-header">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>
+            Авто-восстановление
+          </div>
+          <div class="timer-box">
+            <div class="timer-value" id="countdown">03:00</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="notice-panel">
+        <div class="panel-header">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-sparkle-icon lucide-sparkle"><path d="M11.017 2.814a1 1 0 0 1 1.966 0l1.051 5.558a2 2 0 0 0 1.594 1.594l5.558 1.051a1 1 0 0 1 0 1.966l-5.558 1.051a2 2 0 0 0-1.594 1.594l-1.051 5.558a1 1 0 0 1-1.966 0l-1.051-5.558a2 2 0 0 0-1.594-1.594l-5.558-1.051a1 1 0 0 1 0-1.966l5.558-1.051a2 2 0 0 0 1.594-1.594z"/></svg>
+          Уведомление
+        </div>
+        <p class="notice-text">
+          Не закрывайте страницу. Система выполнит попытку перенаправления на резервный узловой сервер по истечении таймера.
+        </p>
+      </div>
+
+      <div class="footer-info">
+        <div class="status-line">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-loader-circle-icon lucide-loader-circle"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+          Поиск доступных маршрутов...
+        </div>
+      </div>
+
+    </div>
+
+    <script>
+      document.getElementById('incidentId').textContent = crypto.randomUUID().toUpperCase();
+
+      const ipElement = document.getElementById('visitorIp');
+
+      function fetchRealIp() {
+        ipElement.textContent = 'определяется...';
+        fetch('https://api.ipify.org?format=json')
+          .then(function (res) { return res.json(); })
+          .then(function (data) { ipElement.textContent = data.ip; })
+          .catch(function () { ipElement.textContent = 'N/A'; });
+      }
+
+      fetchRealIp();
+
+      let totalSeconds = 180;
+      const timerElement = document.getElementById('countdown');
+
+      function updateTimer() {
+        const minutes = Math.floor(totalSeconds / 60);
+        const seconds = totalSeconds % 60;
+        
+        timerElement.textContent = 
+          `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+
+        if (totalSeconds > 0) {
+          totalSeconds--;
+        } else {
+          totalSeconds = 180;
+          fetchRealIp();
+        }
+      }
+
+      setInterval(updateTimer, 1000);
+
+      const cursorDot = document.getElementById('cursorDot');
+      const cursorCoords = document.getElementById('cursorCoords');
+
+      window.addEventListener('mousemove', (e) => {
+        cursorDot.style.opacity = '1';
+        cursorCoords.style.opacity = '1';
+
+        cursorDot.style.left = `${e.clientX}px`;
+        cursorDot.style.top = `${e.clientY}px`;
+
+        cursorCoords.style.left = `${e.clientX}px`;
+        cursorCoords.style.top = `${e.clientY}px`;
+
+        const x = (e.clientX + Math.random() * 0.009).toFixed(3);
+        const y = (e.clientY + Math.random() * 0.009).toFixed(3);
+
+        cursorCoords.textContent = `[${x}; ${y}]`;
+      });
+
+      window.addEventListener('mouseleave', () => {
+        cursorDot.style.opacity = '0';
+        cursorCoords.style.opacity = '0';
+      });
+    </script>
+
+  </body>
+  </html>
