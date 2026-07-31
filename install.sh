@@ -1,11 +1,14 @@
-#!/bin/bash
+v#!/bin/bash
 set -e
 
-REPO_RAW="https://raw.githubusercontent.com/USERNAME/fuster/main"
+REPO_RAW="https://raw.githubusercontent.com/tatpow/fuster/main"
 
-echo "=================================================="
-echo " Fuster :: Placeholder Site Setup"
-echo "=================================================="
+echo " _____          _            "
+echo "|  ___|   _ ___| |_ ___ _ __ "
+echo "| |_ | | | / __| __/ _ \\ '__|"
+echo "|  _|| |_| \\__ \\ ||  __/ |   "
+echo "|_|   \\__,_|___/\\__\\___|_|   "
+echo "            make sites mo-o-ore faster!"
 echo
 echo "NOTE: if you're deploying this site as a placeholder/stub for"
 echo "something else, make sure you've already fully set up all other"
