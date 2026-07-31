@@ -15,7 +15,7 @@
 ## Quick Start
 
 ```
-bash <(curl -fsSL https://raw.githubusercontent.com/USERNAME/fuster/main/install.sh)
+bash <(curl -fsSL https://raw.githubusercontent.com/tatpow/fuster/main/install.sh)
 ```
 
 That's it — one command deploys the placeholder site (domain, page style, cert, nginx, firewall).
