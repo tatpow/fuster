@@ -14,7 +14,7 @@
 
 ## Quick Start
 
-```
+```bash
 bash <(curl -fsSL https://raw.githubusercontent.com/tatpow/fuster/main/install.sh)
 ```
 
