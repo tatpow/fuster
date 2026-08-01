@@ -1,4 +1,4 @@
-v#!/bin/bash
+#!/bin/bash
 set -e
 
 REPO_RAW="https://raw.githubusercontent.com/tatpow/fuster/main"
@@ -131,7 +131,8 @@ if confirm "Write nginx config for $SERVER_NAMES and (re)start nginx?"; then
     if [ "$HTTP_STATUS" = "200" ]; then
         LOCATION_BLOCK="location / { }"
     else
-        LOCATION_BLOCK="location / { return $HTTP_STATUS; }
+        LOCATION_BLOCK="location = /index.html { internal; }
+    location / { return $HTTP_STATUS; }
     error_page $HTTP_STATUS /index.html;"
     fi
 
