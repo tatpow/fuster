@@ -3,41 +3,38 @@ set -e
 
 REPO_RAW="https://raw.githubusercontent.com/tatpow/fuster/main"
 
-echo " _____          _            "
+echo " _____           _             "
 echo "|  ___|   _ ___| |_ ___ _ __ "
-echo "| |_ | | | / __| __/ _ \\ '__|"
-echo "|  _|| |_| \\__ \\ ||  __/ |   "
-echo "|_|   \\__,_|___/\\__\\___|_|   "
-echo "            make sites mo-o-ore faster!"
+echo "| |_ | | | / __| __/ _ \ '__|"
+echo "|  _|| |_| \__ \ ||  __/ |   "
+echo "|_|   \__,_|___/\__\___|_|   "
+echo "            Stealth Mode Setup"
 echo
-echo "NOTE: if you're deploying this site as a placeholder/stub for"
-echo "something else, make sure you've already fully set up all other"
-echo "required resources first (e.g. 3x-ui, Remnawave, etc.) before"
-echo "running this script. This script only sets up the site itself —"
-echo "it will not install, configure, or connect anything else for you."
+echo "Эта схема: Xray слушает 443. Nginx слушает только локально (8080 и 8081)."
+echo "Xray сам разруливает трафик через fallback."
 echo
 read -p "Press Enter to continue, or Ctrl+C to abort..."
 echo
 
 confirm () {
     read -p "$1 (y/n): " ans
-    [ "$ans" = "y" ]
+    [ "$ans" = "y" ] || [ "$ans" = "Y" ]
 }
 
-read -p "Domain for this site (e.g. site.example.com): " MAIN_DOMAIN
+read -p "Main Domain for VPN & Stub (e.g., w.domen.ru): " MAIN_DOMAIN
 if [ -z "$MAIN_DOMAIN" ]; then
-    echo "Domain is required. Aborting."
+    echo "Main domain is required. Aborting."
     exit 1
 fi
 
-read -p "Extra domain to also cover (Enter to skip): " BASE_DOMAIN
-
-DOMAIN_ARGS="-d $MAIN_DOMAIN"
-SERVER_NAMES="$MAIN_DOMAIN"
-if [ -n "$BASE_DOMAIN" ]; then
-    DOMAIN_ARGS="$DOMAIN_ARGS -d $BASE_DOMAIN"
-    SERVER_NAMES="$MAIN_DOMAIN $BASE_DOMAIN"
+read -p "Subscription Domain (e.g., sub.domen.ru): " SUB_DOMAIN
+if [ -z "$SUB_DOMAIN" ]; then
+    echo "Subscription domain is required for this setup. Aborting."
+    exit 1
 fi
+
+read -p "Internal 3x-ui Subscription Port [default 2053]: " SUB_PORT
+SUB_PORT=${SUB_PORT:-2053}
 
 echo
 echo "--- DNS check ---"
@@ -59,21 +56,19 @@ check_dns () {
 
 DNS_OK=1
 check_dns "$MAIN_DOMAIN" || DNS_OK=0
-if [ -n "$BASE_DOMAIN" ]; then
-    check_dns "$BASE_DOMAIN" || DNS_OK=0
-fi
+check_dns "$SUB_DOMAIN" || DNS_OK=0
 
 if [ "$DNS_OK" -eq 0 ]; then
     echo
     read -p "DNS doesn't fully match yet. Continue anyway? (y/n): " CONTINUE_ANYWAY
-    [ "$CONTINUE_ANYWAY" != "y" ] && { echo "Fix DNS and re-run."; exit 1; }
+    [ "$CONTINUE_ANYWAY" != "y" ] && [ "$CONTINUE_ANYWAY" != "Y" ] && { echo "Fix DNS and re-run."; exit 1; }
 fi
 
 echo
-echo "--- Pick a page style ---"
-echo "1) 503 :: SYS_OVERLOAD  (system under heavy load)"
+echo "--- Pick a stub page style ---"
+echo "1) 503 :: SYS_OVERLOAD"
 echo "2) 403 :: AdBlock notice"
-echo "3) Admin login screen (with fake-auth service worker)"
+echo "3) Admin login screen"
 read -p "Choose [1-3]: " STUB_CHOICE
 
 case "$STUB_CHOICE" in
@@ -82,52 +77,55 @@ case "$STUB_CHOICE" in
     *) STUB_FILE="503.html"; HTTP_STATUS=503 ;;
 esac
 
-echo "Selected: $STUB_FILE (HTTP status: $HTTP_STATUS)"
-
 echo
 echo "--- Installing packages ---"
-if confirm "Install required packages (nginx, curl, socat, cron, dnsutils)?"; then
+if confirm "Install nginx, curl, socat, cron, dnsutils?"; then
     apt update && apt upgrade -y
     apt install -y nginx curl socat cron dnsutils
-else
-    echo "Skipping — make sure these are already installed, or later steps may fail."
 fi
 
 echo
-echo "--- Deploying page ---"
-if confirm "Deploy the selected page ($STUB_FILE) to /var/www/stub?"; then
+echo "--- Deploying stub page ---"
+if confirm "Deploy stub to /var/www/stub?"; then
     mkdir -p /var/www/stub
     curl -fsSL "$REPO_RAW/stub/$STUB_FILE" -o /var/www/stub/index.html
-
     if [ "$STUB_CHOICE" = "3" ]; then
         curl -fsSL "$REPO_RAW/stub/sw.js" -o /var/www/stub/sw.js
     fi
-else
-    echo "Skipping — nginx config below will still point here, so make sure the files exist."
 fi
 
 echo
-echo "--- SSL certificate ---"
-if confirm "Issue an SSL certificate for $SERVER_NAMES via acme.sh (standalone, stops nginx briefly)?"; then
+echo "--- SSL Certificates ---"
+if confirm "Issue SSL for MAIN domain ($MAIN_DOMAIN)?"; then
     if [ ! -d ~/.acme.sh ]; then
         curl https://get.acme.sh | sh -s email=admin@"$MAIN_DOMAIN"
     fi
-
     systemctl stop nginx || true
-    ~/.acme.sh/acme.sh --issue $DOMAIN_ARGS --standalone
-
-    mkdir -p /root/cert/"$MAIN_DOMAIN"
-    ~/.acme.sh/acme.sh --install-cert $DOMAIN_ARGS \
+    ~/.acme.sh/acme.sh --issue -d "$MAIN_DOMAIN" --standalone
+    ~/.acme.sh/acme.sh --install-cert -d "$MAIN_DOMAIN" \
         --fullchain-file /root/cert/"$MAIN_DOMAIN"/fullchain.pem \
         --key-file /root/cert/"$MAIN_DOMAIN"/privkey.pem \
         --reloadcmd "systemctl reload nginx"
-else
-    echo "Skipping — nginx config below expects certs already at /root/cert/$MAIN_DOMAIN/"
+    echo "[OK] Main cert ready."
 fi
 
+if confirm "Issue SSL for SUB domain ($SUB_DOMAIN)?"; then
+    systemctl stop nginx || true
+    ~/.acme.sh/acme.sh --issue -d "$SUB_DOMAIN" --standalone
+    ~/.acme.sh/acme.sh --install-cert -d "$SUB_DOMAIN" \
+        --fullchain-file /root/cert/"$SUB_DOMAIN"/fullchain.pem \
+        --key-file /root/cert/"$SUB_DOMAIN"/privkey.pem \
+        --reloadcmd "systemctl reload nginx"
+    echo "[OK] Sub cert ready."
+fi
+
+systemctl start nginx || true
+
 echo
-echo "--- Configuring nginx (127.0.0.1:8080) ---"
-if confirm "Write nginx config for $SERVER_NAMES and (re)start nginx?"; then
+echo "--- Configuring Nginx (Local Fallbacks) ---"
+if confirm "Write local Nginx configs and restart?"; then
+    
+    # 1. Конфиг для ЗАГЛУШКИ (слушает локально, сюда Xray сбросит обычный браузерный трафик w.domen.ru)
     if [ "$HTTP_STATUS" = "200" ]; then
         LOCATION_BLOCK="location / { }"
     else
@@ -139,25 +137,43 @@ if confirm "Write nginx config for $SERVER_NAMES and (re)start nginx?"; then
     cat > /etc/nginx/sites-available/stub <<EOF
 server {
     listen 127.0.0.1:8080 ssl;
-    server_name $SERVER_NAMES;
+    server_name $MAIN_DOMAIN;
 
     ssl_certificate     /root/cert/$MAIN_DOMAIN/fullchain.pem;
     ssl_certificate_key /root/cert/$MAIN_DOMAIN/privkey.pem;
 
     root /var/www/stub;
     index index.html;
-
     $LOCATION_BLOCK
 }
 EOF
-
     ln -sf /etc/nginx/sites-available/stub /etc/nginx/sites-enabled/
+
+    # 2. Конфиг для ПОДПИСКИ (слушает локально, сюда Xray сбросит трафик sub.domen.ru)
+    cat > /etc/nginx/sites-available/sub <<EOF
+server {
+    listen 127.0.0.1:8081 ssl;
+    server_name $SUB_DOMAIN;
+
+    ssl_certificate     /root/cert/$SUB_DOMAIN/fullchain.pem;
+    ssl_certificate_key /root/cert/$SUB_DOMAIN/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:$SUB_PORT;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+    }
+}
+EOF
+    ln -sf /etc/nginx/sites-available/sub /etc/nginx/sites-enabled/
+
     rm -f /etc/nginx/sites-enabled/default
     nginx -t
-    systemctl start nginx
+    systemctl restart nginx
     systemctl enable nginx
-else
-    echo "Skipping nginx config."
+    echo "[OK] Nginx configured."
 fi
 
 echo
@@ -168,23 +184,23 @@ if confirm "Configure ufw (open SSH + 443)?"; then
         SSH_PORT=${SSH_PORT:-22}
         ufw allow "$SSH_PORT"/tcp
         ufw allow 443/tcp
-        echo "Opened: $SSH_PORT (SSH), 443."
+        echo "Opened: $SSH_PORT (SSH), 443 (HTTPS/Xray)."
         if confirm "Enable ufw now?"; then
             ufw --force enable
             ufw status verbose
         fi
-    else
-        echo "ufw not found — skipping firewall setup."
     fi
-else
-    echo "Skipping firewall configuration."
 fi
 
 echo
 echo "=================================================="
-echo " Site is up"
+echo " SETUP COMPLETE!"
 echo "=================================================="
-echo "Check it: curl -k https://127.0.0.1:8080"
-echo
-echo "This script only sets up the site. Anything else (dashboard, etc.)"
-echo "needs to be installed and configured separately."
+echo "Теперь зайди в панель 3x-ui и настрой Inbound:"
+echo "1. Port: 443"
+echo "2. TLS: ВКЛЮЧИТЬ (указать пути к /root/cert/$MAIN_DOMAIN/...)"
+echo "3. Fallbacks (Добавить два правила):"
+echo "   - Rule 1: SNI = '$SUB_DOMAIN'  --> dest = 8081"
+echo "   - Rule 2: (оставить пустым)    --> dest = 8080"
+echo "4. В настройках панели (Panel Settings) укажи Subscription Port: $SUB_PORT"
+echo "=================================================="
