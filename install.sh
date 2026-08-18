@@ -3,7 +3,7 @@ set -e
 
 REPO_RAW="https://raw.githubusercontent.com/tatpow/fuster/main"
 
-echo " _____          _            "
+echo " _____           _             "
 echo "|  ___|   _ ___| |_ ___ _ __ "
 echo "| |_ | | | / __| __/ _ \\ '__|"
 echo "|  _|| |_| \\__ \\ ||  __/ |   "
@@ -24,19 +24,28 @@ confirm () {
     [ "$ans" = "y" ]
 }
 
-read -p "Domain for this site (e.g. site.example.com): " MAIN_DOMAIN
+read -p "Domain for stub site (e.g. w.example.com): " MAIN_DOMAIN
 if [ -z "$MAIN_DOMAIN" ]; then
     echo "Domain is required. Aborting."
     exit 1
 fi
 
 read -p "Extra domain to also cover (Enter to skip): " BASE_DOMAIN
+read -p "3x-ui Subscription Domain (e.g. sub.example.com, Enter to skip): " SUB_DOMAIN
+
+if [ -n "$SUB_DOMAIN" ]; then
+    read -p "3x-ui Panel Port [default 2053]: " PANEL_PORT
+    PANEL_PORT=${PANEL_PORT:-2053}
+fi
 
 DOMAIN_ARGS="-d $MAIN_DOMAIN"
 SERVER_NAMES="$MAIN_DOMAIN"
 if [ -n "$BASE_DOMAIN" ]; then
     DOMAIN_ARGS="$DOMAIN_ARGS -d $BASE_DOMAIN"
-    SERVER_NAMES="$MAIN_DOMAIN $BASE_DOMAIN"
+    SERVER_NAMES="$SERVER_NAMES $BASE_DOMAIN"
+fi
+if [ -n "$SUB_DOMAIN" ]; then
+    DOMAIN_ARGS="$DOMAIN_ARGS -d $SUB_DOMAIN"
 fi
 
 echo
@@ -61,6 +70,9 @@ DNS_OK=1
 check_dns "$MAIN_DOMAIN" || DNS_OK=0
 if [ -n "$BASE_DOMAIN" ]; then
     check_dns "$BASE_DOMAIN" || DNS_OK=0
+fi
+if [ -n "$SUB_DOMAIN" ]; then
+    check_dns "$SUB_DOMAIN" || DNS_OK=0
 fi
 
 if [ "$DNS_OK" -eq 0 ]; then
@@ -108,7 +120,7 @@ fi
 
 echo
 echo "--- SSL certificate ---"
-if confirm "Issue an SSL certificate for $SERVER_NAMES via acme.sh (standalone, stops nginx briefly)?"; then
+if confirm "Issue SSL certificate for $DOMAIN_ARGS via acme.sh (standalone, stops nginx briefly)?"; then
     if [ ! -d ~/.acme.sh ]; then
         curl https://get.acme.sh | sh -s email=admin@"$MAIN_DOMAIN"
     fi
@@ -127,7 +139,7 @@ fi
 
 echo
 echo "--- Configuring nginx (127.0.0.1:8080) ---"
-if confirm "Write nginx config for $SERVER_NAMES and (re)start nginx?"; then
+if confirm "Write nginx stub config for $SERVER_NAMES?"; then
     if [ "$HTTP_STATUS" = "200" ]; then
         LOCATION_BLOCK="location / { }"
     else
@@ -153,12 +165,36 @@ EOF
 
     ln -sf /etc/nginx/sites-available/stub /etc/nginx/sites-enabled/
     rm -f /etc/nginx/sites-enabled/default
-    nginx -t
-    systemctl start nginx
-    systemctl enable nginx
-else
-    echo "Skipping nginx config."
 fi
+
+if [ -n "$SUB_DOMAIN" ]; then
+    if confirm "Configure reverse proxy for 3x-ui panel ($SUB_DOMAIN -> 127.0.0.1:$PANEL_PORT)?"; then
+        cat > /etc/nginx/sites-available/3xui <<EOF
+server {
+    listen 127.0.0.1:8080 ssl;
+    server_name $SUB_DOMAIN;
+
+    ssl_certificate     /root/cert/$MAIN_DOMAIN/fullchain.pem;
+    ssl_certificate_key /root/cert/$MAIN_DOMAIN/privkey.pem;
+
+    location / {
+        proxy_pass http://127.0.0.1:$PANEL_PORT;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_set_header Upgrade \$http_upgrade;
+        proxy_set_header Connection "upgrade";
+    }
+}
+EOF
+        ln -sf /etc/nginx/sites-available/3xui /etc/nginx/sites-enabled/
+    fi
+fi
+
+nginx -t
+systemctl start nginx
+systemctl enable nginx
 
 echo
 echo "--- Firewall ---"
@@ -182,9 +218,10 @@ fi
 
 echo
 echo "=================================================="
-echo " Site is up"
+echo " Site and Proxy setup complete"
 echo "=================================================="
-echo "Check it: curl -k https://127.0.0.1:8080"
+echo "Check stub: curl -k https://127.0.0.1:8080"
+if [ -n "$SUB_DOMAIN" ]; then
+    echo "3x-ui proxy: https://$SUB_DOMAIN (points to 127.0.0.1:$PANEL_PORT)"
+fi
 echo
-echo "This script only sets up the site. Anything else (dashboard, etc.)"
-echo "needs to be installed and configured separately."
