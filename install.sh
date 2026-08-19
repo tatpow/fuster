@@ -8,12 +8,7 @@ echo "|  ___|   _ ___| |_ ___ _ __ "
 echo "| |_ | | | / __| __/ _ \ '__|"
 echo "|  _|| |_| \__ \ ||  __/ |   "
 echo "|_|   \__,_|___/\__\___|_|   "
-echo "            make sites mo-o-ore faster!"
-echo
-echo "NOTE: This script sets up Nginx Stream (SNI routing) + Stub."
-echo "Make sure 3x-ui is already installed."
-echo
-read -p "Press Enter to continue, or Ctrl+C to abort..."
+echo "v0.20            make sites mo-o-ore faster!"
 echo
 
 confirm () {
