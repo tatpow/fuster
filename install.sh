@@ -8,7 +8,7 @@ echo "|  ___|   _ ___| |_ ___ _ __ "
 echo "| |_ | | | / __| __/ _ \ '__|"
 echo "|  _|| |_| \__ \ ||  __/ |   "
 echo "|_|   \__,_|___/\__\___|_|   "
-echo "v0.20            make sites mo-o-ore faster!"
+echo "v0.21            make sites mo-o-ore faster!"
 echo
 
 confirm () {
@@ -16,13 +16,13 @@ confirm () {
     [ "$ans" = "y" ] || [ "$ans" = "Y" ]
 }
 
-read -p "Main Domain for VPN & Stub (e.g., test.bossand.fun): " MAIN_DOMAIN
+read -p "Main Domain for VPN & Stub (e.g., test.domen.com): " MAIN_DOMAIN
 if [ -z "$MAIN_DOMAIN" ]; then
     echo "Main domain is required. Aborting."
     exit 1
 fi
 
-read -p "Subscription Domain (e.g., testsub.bossand.fun, Enter to skip): " SUB_DOMAIN
+read -p "Subscription Domain (e.g., testsub.domen.com, Enter to skip): " SUB_DOMAIN
 
 read -p "Xray Reality Port [default 3443]: " XRAY_PORT
 XRAY_PORT=${XRAY_PORT:-3443}
