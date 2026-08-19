@@ -11,8 +11,7 @@ echo "|_|   \__,_|___/\__\___|_|   "
 echo "            make sites mo-o-ore faster!"
 echo
 echo "NOTE: This script sets up Nginx Stream (SNI routing) + Stub."
-echo "Make sure 3x-ui is already installed. This script will configure"
-echo "Nginx to route port 443 traffic to Xray (Reality) or Subscription."
+echo "Make sure 3x-ui is already installed."
 echo
 read -p "Press Enter to continue, or Ctrl+C to abort..."
 echo
@@ -28,11 +27,7 @@ if [ -z "$MAIN_DOMAIN" ]; then
     exit 1
 fi
 
-read -p "Subscription Domain (e.g., testsub.bossand.fun): " SUB_DOMAIN
-if [ -z "$SUB_DOMAIN" ]; then
-    echo "Subscription domain is required. Aborting."
-    exit 1
-fi
+read -p "Subscription Domain (e.g., testsub.bossand.fun, Enter to skip): " SUB_DOMAIN
 
 read -p "Xray Reality Port [default 3443]: " XRAY_PORT
 XRAY_PORT=${XRAY_PORT:-3443}
@@ -60,7 +55,9 @@ check_dns () {
 
 DNS_OK=1
 check_dns "$MAIN_DOMAIN" || DNS_OK=0
-check_dns "$SUB_DOMAIN" || DNS_OK=0
+if [ -n "$SUB_DOMAIN" ]; then
+    check_dns "$SUB_DOMAIN" || DNS_OK=0
+fi
 
 if [ "$DNS_OK" -eq 0 ]; then
     echo
@@ -111,24 +108,22 @@ if confirm "Issue SSL certificate for MAIN domain ($MAIN_DOMAIN)?"; then
     fi
     systemctl stop nginx || true
     ~/.acme.sh/acme.sh --issue -d "$MAIN_DOMAIN" --standalone
-
-    systemctl start nginx
-    
+    systemctl start nginx || true
     mkdir -p /root/cert/"$MAIN_DOMAIN"
     ~/.acme.sh/acme.sh --install-cert -d "$MAIN_DOMAIN" --fullchain-file /root/cert/"$MAIN_DOMAIN"/fullchain.pem --key-file /root/cert/"$MAIN_DOMAIN"/privkey.pem --reloadcmd "systemctl reload nginx"
     echo "[OK] Main cert ready."
 fi
 
-# 2. Sub Domain Cert (Separate to avoid acme.sh bugs)
-if confirm "Issue SEPARATE SSL certificate for SUB domain ($SUB_DOMAIN)?"; then
-    systemctl stop nginx || true
-    ~/.acme.sh/acme.sh --issue -d "$SUB_DOMAIN" --standalone
-
-    systemctl start nginx
-    
-    mkdir -p /root/cert/"$SUB_DOMAIN"
-    ~/.acme.sh/acme.sh --install-cert -d "$SUB_DOMAIN" --fullchain-file /root/cert/"$SUB_DOMAIN"/fullchain.pem --key-file /root/cert/"$SUB_DOMAIN"/privkey.pem --reloadcmd "systemctl reload nginx"
-    echo "[OK] Sub cert ready."
+# 2. Sub Domain Cert (Only if provided)
+if [ -n "$SUB_DOMAIN" ]; then
+    if confirm "Issue SEPARATE SSL certificate for SUB domain ($SUB_DOMAIN)?"; then
+        systemctl stop nginx || true
+        ~/.acme.sh/acme.sh --issue -d "$SUB_DOMAIN" --standalone
+        systemctl start nginx || true
+        mkdir -p /root/cert/"$SUB_DOMAIN"
+        ~/.acme.sh/acme.sh --install-cert -d "$SUB_DOMAIN" --fullchain-file /root/cert/"$SUB_DOMAIN"/fullchain.pem --key-file /root/cert/"$SUB_DOMAIN"/privkey.pem --reloadcmd "systemctl reload nginx"
+        echo "[OK] Sub cert ready."
+    fi
 fi
 
 systemctl start nginx || true
@@ -154,7 +149,14 @@ events {
 
 stream {
     map \$ssl_preread_server_name \$backend_node {
-        $SUB_DOMAIN  127.0.0.1:$SUB_PORT;
+NGINXCONF
+
+    # Dynamically add subdomain routing only if it exists
+    if [ -n "$SUB_DOMAIN" ]; then
+        echo "        $SUB_DOMAIN  127.0.0.1:$SUB_PORT;" >> /etc/nginx/nginx.conf
+    fi
+    
+    cat >> /etc/nginx/nginx.conf << NGINXCONF2
         default      127.0.0.1:$XRAY_PORT;
     }
 
@@ -179,7 +181,7 @@ http {
     include /etc/nginx/conf.d/*.conf;
     include /etc/nginx/sites-enabled/*;
 }
-NGINXCONF
+NGINXCONF2
 
     # Create stub server config
     if [ "$HTTP_STATUS" = "200" ]; then
@@ -234,4 +236,4 @@ echo
 echo "=================================================="
 echo " SETUP COMPLETE!"
 echo "=================================================="
-echo 
+echo
