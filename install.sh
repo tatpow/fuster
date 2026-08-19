@@ -8,7 +8,7 @@ echo "|  ___|   _ ___| |_ ___ _ __ "
 echo "| |_ | | | / __| __/ _ \ '__|"
 echo "|  _|| |_| \__ \ ||  __/ |   "
 echo "|_|   \__,_|___/\__\___|_|   "
-echo "v0.22            make sites mo-o-ore faster!"
+echo "v0.23            make sites mo-o-ore faster!"
 echo
 read -p "Press Enter to continue, or Ctrl+C to abort..."
 echo
@@ -33,33 +33,46 @@ SUB_PORT=2096
 STUB_PORT=8080
 
 echo
-echo "--- DNS check ---"
-SERVER_IP=$(curl -4 -s ifconfig.me)
-echo "This server's IP: $SERVER_IP"
-
-check_dns () {
-    local d="$1"
-    local resolved
-    resolved=$(dig +short "$d" | tail -n1)
-    if [ "$resolved" != "$SERVER_IP" ]; then
-        echo "  [!] $d -> '$resolved' (expected $SERVER_IP)"
-        return 1
-    else
-        echo "  [OK] $d -> $SERVER_IP"
-        return 0
-    fi
-}
-
-DNS_OK=1
-check_dns "$MAIN_DOMAIN" || DNS_OK=0
-if [ -n "$SUB_DOMAIN" ]; then
-    check_dns "$SUB_DOMAIN" || DNS_OK=0
+echo "--- Installing dnsutils ---"
+if confirm "Install dnsutils for DNS verification?"; then
+    apt update
+    apt install -y dnsutils
+else
+    echo "Skipping — DNS check will be disabled."
 fi
 
-if [ "$DNS_OK" -eq 0 ]; then
-    echo
-    read -p "DNS doesn't fully match yet. Continue anyway? (y/n): " CONTINUE_ANYWAY
-    [ "$CONTINUE_ANYWAY" != "y" ] && [ "$CONTINUE_ANYWAY" != "Y" ] && { echo "Fix DNS and re-run."; exit 1; }
+echo
+echo "--- DNS check ---"
+if command -v dig &> /dev/null; then
+    SERVER_IP=$(curl -4 -s ifconfig.me)
+    echo "This server's IP: $SERVER_IP"
+
+    check_dns () {
+        local d="$1"
+        local resolved
+        resolved=$(dig +short "$d" | tail -n1)
+        if [ "$resolved" != "$SERVER_IP" ]; then
+            echo "  [!] $d -> '$resolved' (expected $SERVER_IP)"
+            return 1
+        else
+            echo "  [OK] $d -> $SERVER_IP"
+            return 0
+        fi
+    }
+
+    DNS_OK=1
+    check_dns "$MAIN_DOMAIN" || DNS_OK=0
+    if [ -n "$SUB_DOMAIN" ]; then
+        check_dns "$SUB_DOMAIN" || DNS_OK=0
+    fi
+
+    if [ "$DNS_OK" -eq 0 ]; then
+        echo
+        read -p "DNS doesn't fully match yet. Continue anyway? (y/n): " CONTINUE_ANYWAY
+        [ "$CONTINUE_ANYWAY" != "y" ] && [ "$CONTINUE_ANYWAY" != "Y" ] && { echo "Fix DNS and re-run."; exit 1; }
+    fi
+else
+    echo "dig not found — skipping DNS check."
 fi
 
 echo
@@ -79,9 +92,9 @@ echo "Selected: $STUB_FILE (HTTP status: $HTTP_STATUS)"
 
 echo
 echo "--- Installing packages ---"
-if confirm "Install required packages (nginx, curl, socat, cron, dnsutils, libnginx-mod-stream)?"; then
+if confirm "Install required packages (nginx, curl, socat, cron, libnginx-mod-stream)?"; then
     apt update && apt upgrade -y
-    apt install -y nginx curl socat cron dnsutils libnginx-mod-stream
+    apt install -y nginx curl socat cron libnginx-mod-stream
 else
     echo "Skipping — make sure these are already installed, or later steps may fail."
 fi
@@ -94,6 +107,19 @@ if confirm "Deploy the selected page ($STUB_FILE) to /var/www/stub?"; then
     if [ "$STUB_CHOICE" = "3" ]; then
         curl -fsSL "$REPO_RAW/stub/sw.js" -o /var/www/stub/sw.js
     fi
+    
+    # Проверка что файл скачался корректно
+    if [ ! -s /var/www/stub/index.html ]; then
+        echo "[!] Warning: Failed to download page. Creating minimal stub..."
+        cat > /var/www/stub/index.html << 'MINIMAL'
+<!DOCTYPE html>
+<html><head><title>503</title></head>
+<body><center><h1>503 Service Unavailable</h1></center></body>
+</html>
+MINIMAL
+    fi
+else
+    echo "Skipping — nginx config below will still point here, so make sure the files exist."
 fi
 
 echo
