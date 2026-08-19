@@ -111,6 +111,9 @@ if confirm "Issue SSL certificate for MAIN domain ($MAIN_DOMAIN)?"; then
     fi
     systemctl stop nginx || true
     ~/.acme.sh/acme.sh --issue -d "$MAIN_DOMAIN" --standalone
+
+    systemctl start nginx
+    
     mkdir -p /root/cert/"$MAIN_DOMAIN"
     ~/.acme.sh/acme.sh --install-cert -d "$MAIN_DOMAIN" --fullchain-file /root/cert/"$MAIN_DOMAIN"/fullchain.pem --key-file /root/cert/"$MAIN_DOMAIN"/privkey.pem --reloadcmd "systemctl reload nginx"
     echo "[OK] Main cert ready."
@@ -120,6 +123,9 @@ fi
 if confirm "Issue SEPARATE SSL certificate for SUB domain ($SUB_DOMAIN)?"; then
     systemctl stop nginx || true
     ~/.acme.sh/acme.sh --issue -d "$SUB_DOMAIN" --standalone
+
+    systemctl start nginx
+    
     mkdir -p /root/cert/"$SUB_DOMAIN"
     ~/.acme.sh/acme.sh --install-cert -d "$SUB_DOMAIN" --fullchain-file /root/cert/"$SUB_DOMAIN"/fullchain.pem --key-file /root/cert/"$SUB_DOMAIN"/privkey.pem --reloadcmd "systemctl reload nginx"
     echo "[OK] Sub cert ready."
@@ -228,31 +234,4 @@ echo
 echo "=================================================="
 echo " SETUP COMPLETE!"
 echo "=================================================="
-echo
-echo "ВАЖНО: Настрой 3x-ui панель следующим образом:"
-echo
-echo "1. Reality Inbound:"
-echo "   - Port: $XRAY_PORT"
-echo "   - Target (Цель): 127.0.0.1:$STUB_PORT"
-echo "   - Server Names: $MAIN_DOMAIN, $SUB_DOMAIN"
-echo "   - В 'Расширенном шаблоне' (JSON) добавь сертификаты:"
-echo '     "certificates": [{'
-echo '       "certificateFile": "/root/cert/'$MAIN_DOMAIN'/fullchain.pem",'
-echo '       "keyFile": "/root/cert/'$MAIN_DOMAIN'/privkey.pem"'
-echo '     }]'
-echo
-echo "2. Настройки подписки (Panel Settings -> Subscription):"
-echo "   - subPort: $SUB_PORT"
-echo "   - subDomain: $SUB_DOMAIN"
-echo "   - subCertFile: /root/cert/$SUB_DOMAIN/fullchain.pem"
-echo "   - subKeyFile: /root/cert/$SUB_DOMAIN/privkey.pem"
-echo "   - subPath: / (или /sub/)"
-echo "   - URI обратного прокси: https://$SUB_DOMAIN/"
-echo
-echo "После настройки в панели выполни: systemctl restart x-ui"
-echo
-echo "Результат:"
-echo "  VPN: $MAIN_DOMAIN:443"
-echo "  Подписка: https://$SUB_DOMAIN/"
-echo "  Заглушка: https://$MAIN_DOMAIN (в браузере)"
-echo "=================================================="
+echo 
