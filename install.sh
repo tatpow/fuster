@@ -8,7 +8,9 @@ echo "|  ___|   _ ___| |_ ___ _ __ "
 echo "| |_ | | | / __| __/ _ \ '__|"
 echo "|  _|| |_| \__ \ ||  __/ |   "
 echo "|_|   \__,_|___/\__\___|_|   "
-echo "v0.21            make sites mo-o-ore faster!"
+echo "v0.22            make sites mo-o-ore faster!"
+echo
+read -p "Press Enter to continue, or Ctrl+C to abort..."
 echo
 
 confirm () {
